@@ -1,0 +1,54 @@
+{
+  "name": "agentwatch",
+  "version": "0.1.0",
+  "description": "A live perch over your Claude Code agents. A zero-dependency terminal dashboard showing every active session in real time — what it's doing right now, its tokens, cost, and whether it needs you. The runtime sibling to agentmeter.",
+  "type": "module",
+  "bin": {
+    "agentwatch": "bin/agentwatch.js"
+  },
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "start": "node bin/agentwatch.js"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "claude",
+    "claude-code",
+    "tui",
+    "dashboard",
+    "monitor",
+    "live",
+    "observability",
+    "tokens",
+    "cost",
+    "cli",
+    "developer-tools"
+  ],
+  "author": "David Chong",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davidcjw/agentwatch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/davidcjw/agentwatch/issues"
+  },
+  "homepage": "https://github.com/davidcjw/agentwatch#readme",
+  "devDependencies": {
+    "vitest": "^2.1.8"
+  }
+}
