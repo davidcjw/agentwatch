@@ -40,9 +40,13 @@
   "engines": {
     "node": ">=18"
   },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/davidcjw/agentwatch.git"
+    "url": "git+https://github.com/davidcjw/agentwatch.git"
   },
   "bugs": {
     "url": "https://github.com/davidcjw/agentwatch/issues"
