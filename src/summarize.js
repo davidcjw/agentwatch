@@ -180,6 +180,30 @@ export function classify({ ageSec, lastKind, lastTool, sidechain, activeSeconds,
 }
 
 /**
+ * Demote `await`/`stall` to `ended` when we have deterministic proof that no
+ * `claude` process is still running for this session's cwd. Content-derived
+ * status can't distinguish "genuinely waiting on you" from "the process
+ * already exited" — this cross-checks against the live process table instead.
+ *
+ * Only ever demotes; never promotes. A missing/unmatched `liveCwds` means
+ * "unknown", not "dead" — a session is left alone rather than falsely marked
+ * ended, and two sessions sharing one cwd (e.g. two tabs in the same repo)
+ * are also left alone if *either* is still alive, since cwd is all a process
+ * table exposes (no per-session id).
+ *
+ * @param {object} summary a summarizeFile()/restatus() result
+ * @param {Set<string>|null} liveCwds cwds with a live `claude` process, or
+ *   `null` when liveness couldn't be determined (skip demotion)
+ */
+export function applyLiveness(summary, liveCwds) {
+  if (!liveCwds) return summary;
+  if (!summary.cwd) return summary;
+  if (!ATTENTION_STATES.has(summary.status.state)) return summary;
+  if (liveCwds.has(summary.cwd)) return summary;
+  return { ...summary, status: { state: 'ended', label: 'ended' } };
+}
+
+/**
  * Read and summarize one transcript file. Returns null if it can't be read or
  * has no usable records.
  * @param {{ file: string, projectDir: string, mtimeMs: number }} entry

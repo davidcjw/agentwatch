@@ -1,6 +1,7 @@
 import { scan } from './scan.js';
 import { renderFrame } from './render.js';
 import { makeColors } from './format.js';
+import { liveClaudeCwds } from './processes.js';
 
 const ALT_ON = '\x1b[?1049h';
 const ALT_OFF = '\x1b[?1049l';
@@ -39,6 +40,7 @@ export function runApp(opts) {
         activeSeconds: opts.activeSeconds,
         stallSeconds: opts.stallSeconds,
         cache,
+        liveCwds: liveClaudeCwds(), // process table can change between ticks — recheck every scan
       });
       err = null;
     } catch (e) {

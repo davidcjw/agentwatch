@@ -5,6 +5,7 @@ import { renderFrame, sortSessions } from '../src/render.js';
 import { runApp } from '../src/app.js';
 import { makeColors } from '../src/format.js';
 import { ACTIVE_SECONDS, STALL_SECONDS } from '../src/summarize.js';
+import { liveClaudeCwds } from '../src/processes.js';
 
 const VERSION = '0.1.0';
 
@@ -85,7 +86,7 @@ function main() {
   if (opts.json) {
     let sessions;
     try {
-      sessions = scan(opts.root, { now: Date.now(), windowMin: opts.windowMin, activeSeconds: opts.activeSeconds, stallSeconds: opts.stallSeconds });
+      sessions = scan(opts.root, { now: Date.now(), windowMin: opts.windowMin, activeSeconds: opts.activeSeconds, stallSeconds: opts.stallSeconds, liveCwds: liveClaudeCwds() });
     } catch (e) {
       fail(e.message);
     }
@@ -97,7 +98,7 @@ function main() {
   if (opts.once || !process.stdout.isTTY) {
     let sessions;
     try {
-      sessions = scan(opts.root, { now: Date.now(), windowMin: opts.windowMin, activeSeconds: opts.activeSeconds, stallSeconds: opts.stallSeconds });
+      sessions = scan(opts.root, { now: Date.now(), windowMin: opts.windowMin, activeSeconds: opts.activeSeconds, stallSeconds: opts.stallSeconds, liveCwds: liveClaudeCwds() });
     } catch (e) {
       fail(e.message);
     }

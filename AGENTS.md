@@ -14,8 +14,9 @@ the same data). Node ≥ 18, ESM (`"type": "module"`), no runtime dependencies.
 ```
 bin/agentwatch.js   CLI: arg parsing, --json / --once / live dispatch
 src/discover.js     statAll() — cheap mtime/size walk of the transcript tree
-src/summarize.js    summarizeRecords() (pure), summarizeFile(), classify(), restatus()
-src/scan.js         scan() — window filter + content-keyed parse cache
+src/summarize.js    summarizeRecords() (pure), summarizeFile(), classify(), restatus(), applyLiveness()
+src/scan.js         scan() — window filter + content-keyed parse cache + liveCwds demotion
+src/processes.js    liveClaudeCwds() — cwds of running `claude` processes, via ps + lsof
 src/render.js       renderFrame() (pure: sessions → frame string), sortSessions()
 src/format.js       humanizers (tokens/cost/age), cell()/truncate(), ANSI colors
 src/app.js          live loop: alt-screen, raw stdin, paint + scan timers
@@ -38,6 +39,15 @@ test/*.test.js      vitest; pure cores are unit-tested with fixtures
 - **Status is a heuristic** over an append-only log (see README "How status is
   inferred"). Changes to `classify()` must update both the README legend and
   `test/summarize.test.js`.
+- **Liveness is a deterministic cross-check, not a heuristic.** `processes.js`
+  shells out to `ps`/`lsof` to find cwds with a live `claude` process;
+  `applyLiveness()` in `summarize.js` uses that to demote stale `await`/`stall`
+  to `ended` (see README "How status is inferred"). It only ever demotes, and
+  only `await`/`stall` (`ATTENTION_STATES`) — never invents a "dead" verdict
+  when liveness is `null` (tool unavailable) or a cwd is unmatched some other
+  way. Cache the pre-liveness summary in `scan.js` (`summarizeFile`'s result),
+  not the post-liveness one, so liveness is re-applied fresh every tick even
+  when a file's parse is reused from cache.
 - **Pricing** mirrors `agentmeter/src/pricing.js`. If models/prices change,
   update both repos.
 

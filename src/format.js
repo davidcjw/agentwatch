@@ -38,6 +38,7 @@ export function statusStyle(state) {
     case 'reply': return { color: 'green', glyph: '◑' };
     case 'await': return { color: 'yellow', glyph: '▲' };
     case 'stall': return { color: 'red', glyph: '■' };
+    case 'ended': return { color: 'gray', glyph: '○' };
     default: return { color: 'gray', glyph: '·' };
   }
 }

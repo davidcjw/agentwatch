@@ -71,6 +71,7 @@ Keys while running: **q** quit · **r** force refresh · **a** toggle all/active
 | `◑` | **replying** | The model is streaming its answer. |
 | `▲` | **awaiting you** | It finished its turn and is waiting for your next message. |
 | `■` | **stalled** | A tool has been pending a long time — a long-running command, or an open permission prompt that needs you. |
+| `○` | **ended** | Content alone looked like "awaiting you" / "stalled", but no `claude` process is actually running for it anymore — see below. |
 | `·` | **idle** | No recent activity. |
 
 Sessions that **need you** (awaiting / stalled) sort to the top.
@@ -91,6 +92,17 @@ This is a heuristic read of an append-only log, not an instrumented hook, so a
 very long model turn can briefly read as quiet. Tune `--active` / `--stall` to
 taste. Title and last prompt come from the `ai-title` and `last-prompt` records
 Claude Code writes; tokens and cost reuse agentmeter's pricing model.
+
+Content alone can't distinguish "genuinely waiting on you" from "the process
+already exited" — a finished `claude -p` one-shot ends its transcript with an
+assistant text block exactly like a live session paused for your input. To
+tell those apart, agentwatch cross-checks the local process table (`ps` +
+`lsof`) on every tick: if no `claude` process is running for a session's
+`cwd`, an `await`/`stall` label is deterministically downgraded to **ended**
+instead of trusting the stale heuristic. This is best-effort and macOS/Linux
+only — if `ps`/`lsof` are unavailable, or two sessions share a cwd and only
+one has exited, agentwatch leaves the heuristic label alone rather than
+guessing wrong.
 
 ## Performance
 

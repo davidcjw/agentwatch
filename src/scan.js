@@ -1,5 +1,5 @@
 import { statAll } from './discover.js';
-import { summarizeFile, restatus } from './summarize.js';
+import { summarizeFile, restatus, applyLiveness } from './summarize.js';
 
 /**
  * Scan the transcript root and return the session summaries within the active
@@ -9,12 +9,16 @@ import { summarizeFile, restatus } from './summarize.js';
  *
  * @param {string} root transcript directory
  * @param {{ now:number, windowMin:number, activeSeconds?:number,
- *           stallSeconds?:number, cache?:Map }} opts
- *   windowMin = Infinity to include every session regardless of age.
+ *           stallSeconds?:number, cache?:Map, liveCwds?:Set<string>|null }} opts
+ *   windowMin = Infinity to include every session regardless of age. liveCwds,
+ *   when passed, demotes stale await/stall sessions to `ended` (see
+ *   applyLiveness()); the cache stores the pre-liveness summary so liveness is
+ *   always re-applied fresh even when a cached file's parse is reused.
  * @returns {Array<object>} session summaries
  */
 export function scan(root, opts) {
   const cache = opts.cache;
+  const liveCwds = opts.liveCwds ?? null;
   const windowMs = opts.windowMin === Infinity ? Infinity : opts.windowMin * 60000;
   const out = [];
 
@@ -23,14 +27,14 @@ export function scan(root, opts) {
 
     const hit = cache && cache.get(e.file);
     if (hit && hit.mtimeMs === e.mtimeMs && hit.size === e.size) {
-      out.push(restatus(hit.summary, opts)); // unchanged file → just refresh the clock
+      out.push(applyLiveness(restatus(hit.summary, opts), liveCwds)); // unchanged file → just refresh the clock
       continue;
     }
 
     const summary = summarizeFile(e, opts);
     if (!summary) continue;
     if (cache) cache.set(e.file, { mtimeMs: e.mtimeMs, size: e.size, summary });
-    out.push(summary);
+    out.push(applyLiveness(summary, liveCwds));
   }
   return out;
 }

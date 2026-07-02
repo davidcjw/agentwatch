@@ -74,4 +74,20 @@ describe('scan', () => {
     const out = scan(root, { now: T0 + 3000, windowMin: 60, cache });
     expect(out[0].lastPrompt).toBe('changed');
   });
+
+  it('demotes a cached await session to ended once its cwd falls out of liveCwds, without re-reading the file', () => {
+    const awaiting = [
+      { type: 'assistant', timestamp: iso(T0), message: { model: 'claude-opus-4-8', usage: { input_tokens: 5, output_tokens: 5 }, content: [{ type: 'text', text: 'done' }] } },
+      { cwd: '/tmp/proj-cwd-marker' },
+    ];
+    writeSession('-tmp-p', 'a', awaiting, T0);
+    const cache = new Map();
+
+    const stillRunning = scan(root, { now: T0 + 120000, windowMin: 60, cache, liveCwds: new Set(['/tmp/proj-cwd-marker']) });
+    expect(stillRunning[0].status.state).toBe('await');
+    expect(cache.size).toBe(1); // liveness isn't baked into the cached summary
+
+    const processExited = scan(root, { now: T0 + 180000, windowMin: 60, cache, liveCwds: new Set() });
+    expect(processExited[0].status.state).toBe('ended');
+  });
 });

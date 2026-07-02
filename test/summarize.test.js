@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { summarizeRecords, classify, restatus } from '../src/summarize.js';
+import { summarizeRecords, classify, restatus, applyLiveness } from '../src/summarize.js';
 
 const T0 = Date.parse('2026-06-30T00:00:00.000Z');
 const iso = (ms) => new Date(ms).toISOString();
@@ -96,5 +96,43 @@ describe('restatus', () => {
     expect(later.status.state).toBe('await'); // 5 min later
     expect(later.ageSec).toBeGreaterThan(s.ageSec);
     expect(later.cost).toBe(s.cost); // content-derived fields unchanged
+  });
+});
+
+describe('applyLiveness', () => {
+  const awaiting = { cwd: '/Users/x/proj', status: { state: 'await', label: 'awaiting you' } };
+  const stalled = { cwd: '/Users/x/proj', status: { state: 'stall', label: 'stalled: Bash' } };
+  const running = { cwd: '/Users/x/proj', status: { state: 'run', label: 'Bash' } };
+  const idle = { cwd: '/Users/x/proj', status: { state: 'idle', label: 'idle' } };
+
+  it('demotes await to ended when no live process matches the cwd', () => {
+    const out = applyLiveness(awaiting, new Set(['/Users/x/other']));
+    expect(out.status).toEqual({ state: 'ended', label: 'ended' });
+  });
+
+  it('demotes stall to ended the same way', () => {
+    const out = applyLiveness(stalled, new Set());
+    expect(out.status.state).toBe('ended');
+  });
+
+  it('leaves await alone when the cwd has a live process', () => {
+    const out = applyLiveness(awaiting, new Set(['/Users/x/proj']));
+    expect(out.status).toEqual(awaiting.status);
+  });
+
+  it('never demotes run/idle — only the attention states are ambiguous', () => {
+    expect(applyLiveness(running, new Set()).status.state).toBe('run');
+    expect(applyLiveness(idle, new Set()).status.state).toBe('idle');
+  });
+
+  it('skips demotion when liveCwds is null (unknown), not just empty', () => {
+    const out = applyLiveness(awaiting, null);
+    expect(out.status).toEqual(awaiting.status);
+  });
+
+  it('skips demotion when the summary has no cwd to check against', () => {
+    const noCwd = { cwd: null, status: { state: 'await', label: 'awaiting you' } };
+    const out = applyLiveness(noCwd, new Set());
+    expect(out.status.state).toBe('await');
   });
 });
