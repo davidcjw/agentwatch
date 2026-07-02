@@ -49,7 +49,9 @@ test/*.test.js      vitest; pure cores are unit-tested with fixtures
   not the post-liveness one, so liveness is re-applied fresh every tick even
   when a file's parse is reused from cache.
 - **Pricing** mirrors `agentmeter/src/pricing.js`. If models/prices change,
-  update both repos.
+  update both repos. `test/pricing-sync.test.js` enforces this locally when
+  the sibling repo is checked out alongside this one (it skips itself
+  otherwise, e.g. in this repo's own CI).
 
 ## Working here
 
