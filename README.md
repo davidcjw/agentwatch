@@ -1,5 +1,11 @@
 # agentwatch
 
+[![npm version](https://img.shields.io/npm/v/agentwatch.svg)](https://www.npmjs.com/package/agentwatch)
+[![CI](https://github.com/davidcjw/agentwatch/actions/workflows/ci.yml/badge.svg)](https://github.com/davidcjw/agentwatch/actions/workflows/ci.yml)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)
+![dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen.svg)
+
 **A live perch over your Claude Code agents.** A zero-dependency terminal
 dashboard that shows every active session in real time — what each one is doing
 *right now*, how many tokens and dollars it's burning, and whether it's quietly
@@ -11,17 +17,24 @@ is that missing live view. It's the runtime sibling to
 [agentmeter](https://github.com/davidcjw/agentmeter) — agentmeter tells you what
 your agents *cost after the fact*; agentwatch tells you what they're *doing now*.
 
+<p align="center">
+  <img src="docs/demo.gif" alt="agentwatch live dashboard: sessions labelled awaiting you, stalled, working, and idle, with tokens, cost, and age per session" width="820">
+</p>
+
 ```
 ● agentwatch                                                              1:22:39 am
-1 working  1 need you  1 idle  ·  window spend $88.02
+1 working  2 need you  2 idle  ·  window spend $3.44
 
 STATUS           PROJECT        WHAT                                  MODEL       TOK   COST   AGE
-▲ awaiting you   card-manager   Plan next advanced development tool   opus-4-8  99.9M $77.30   36m
-⠋ thinking       agentwatch     Identify complementary dev tools t…   opus-4-8   7.2M  $9.92    5s
-· idle           footprint      Should be the same name               sonnet-4…  1.1M    80¢   15m
+▲ awaiting you   payments-api   Fix the failing auth-token refresh …  opus-4-8   878k $1.03    3m
+■ stalled: Bash  data-pipeline  Backfill last quarter of events       opus-4-8   1.2M $1.37   15m
+⠋ Edit           acme-dashboard Add the cohort retention heatmap      opus-4-8   586k   69¢    5s
+· idle           blog-engine    Draft the release-notes post          opus-4-8    98k   11¢   25m
 
 q quit  r refresh  a all/active
 ```
+
+<sub>Demo recorded with [vhs](https://github.com/charmbracelet/vhs) against a synthetic transcript root — regenerate with `vhs docs/demo.tape`.</sub>
 
 It reads your local Claude Code transcripts (`~/.claude/projects`). Nothing is
 sent anywhere; there is no network access and no configuration.
