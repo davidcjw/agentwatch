@@ -1,6 +1,6 @@
 {
-  "name": "agentwatch",
-  "version": "0.1.0",
+  "name": "@davidcjw/agentwatch",
+  "version": "0.1.1",
   "description": "A live perch over your Claude Code agents. A zero-dependency terminal dashboard showing every active session in real time — what it's doing right now, its tokens, cost, and whether it needs you. The runtime sibling to agentmeter.",
   "type": "module",
   "bin": {
